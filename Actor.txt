@@ -1,0 +1,48 @@
+import requests
+
+def get_filmography_omdb(actor_name, api_key):
+    try:
+       
+        url = f"http://www.omdbapi.com/?s={actor_name}&apikey={api_key}&type=movie"
+        
+        
+        response = requests.get(url, timeout=10)
+        
+        
+        if response.status_code != 200:
+            return f"Error: Unable to fetch data. Status code: {response.status_code}"
+        
+        
+        data = response.json()
+        
+        # Check if any movies are found
+        if data['Response'] == 'False':
+            return f"No results found for {actor_name}."
+        
+       
+        filmography = [(movie['Title'], movie['Year']) for movie in data['Search']]
+        
+       
+        filmography_sorted = sorted(filmography, key=lambda x: x[1], reverse=True)
+        
+        return filmography_sorted
+    
+    except requests.exceptions.ConnectionError:
+        return "Error: Network error occurred. Please check your internet connection."
+    except requests.exceptions.Timeout:
+        return "Error: Request timed out. Please try again."
+    except requests.exceptions.RequestException as e:
+        return f"Error: An error occurred: {str(e)}"
+
+if _name_ == "_main_":
+    actor_name = input("Enter the actor's name: ")
+    api_key = "36742bc4"  # Replace this with your actual OMDb API key
+    films = get_filmography_omdb(actor_name, api_key)
+
+    
+    if isinstance(films, str):
+        print(films)
+    else:
+        print(f"Films done by {actor_name} in descending order:")
+        for film in films:
+            print(f"{film[1]}: {film[0]}")
